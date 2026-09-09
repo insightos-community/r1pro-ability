@@ -1,0 +1,64 @@
+api_version: 1
+robot:
+  id: r1pro-fake-001
+  display_name: R1 Pro Tote Fake 001
+  model: r1_pro_chassis
+  backend: fake
+  sdk:
+    package: semantic-robot-sdk-r1pro
+    firmware_profile: fake-v2
+    providers: {kinematics: fake, motion: local, navigation: local}
+    options: {auto_complete: true, stop_confirmed: true}
+  frames:
+    world: world
+    base: base_link
+    end_effectors: {left: left_tote_load_frame, right: right_tote_load_frame}
+  tools:
+    - tool_ref: component://tool/left
+      side: left
+      kind: tote_clamp
+      frame: left_tote_load_frame
+      joint: left_tote_clamp_joint
+      travel_m: 0.035
+      normal_force_n: 60.0
+      maximum_force_n: 120.0
+    - tool_ref: component://tool/right
+      side: right
+      kind: tote_clamp
+      frame: right_tote_load_frame
+      joint: right_tote_clamp_joint
+      travel_m: 0.035
+      normal_force_n: 60.0
+      maximum_force_n: 120.0
+  kinematics:
+    named_postures:
+      travel:
+        torso_joint1: 0.0
+        torso_joint2: 0.0
+        torso_joint3: 0.0
+        torso_joint4: 0.0
+        left_arm_joint1: 0.0
+        left_arm_joint2: 0.0
+        left_arm_joint3: 0.0
+        left_arm_joint4: 0.0
+        left_arm_joint5: 0.0
+        left_arm_joint6: 0.0
+        left_arm_joint7: 0.0
+        right_arm_joint1: 0.0
+        right_arm_joint2: 0.0
+        right_arm_joint3: 0.0
+        right_arm_joint4: 0.0
+        right_arm_joint5: 0.0
+        right_arm_joint6: 0.0
+        right_arm_joint7: 0.0
+  safety: {maximum_base_speed: 0.4, maximum_joint_speed: 0.5}
+ability_framework: {endpoint: http://127.0.0.1:8080, managed_by_pilot: true}
+abilities:
+  navigation: {}
+  manipulator_motion: {default_tool_side: left}
+  end_effector: {default_tool_side: left}
+  robot_state: {}
+  sensor_capture: {}
+  object_perception: {model_registry_path: configs/models.example.json}
+  grasp_planning: {model_registry_path: configs/models.example.json}
+pilot: {robot_skill_directory: /opt/semantic/robot-skills, worker_timeout: 30, heartbeat_interval_seconds: 2, allow_ability_debug: true}

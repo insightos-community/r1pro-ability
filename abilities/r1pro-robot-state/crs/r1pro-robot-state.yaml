@@ -1,0 +1,18 @@
+kind: AtomAbility
+metadata:
+  name: r1pro-robot-state
+spec:
+  abilityName: R1ProRobotState.V2
+  package: semantic.r1pro.robot-state
+  version: 0.4.0
+  position: localhost
+  config:
+    robotDeploymentPath: configs/robot-deployment.fake.yaml
+    executionStorePath: var/r1pro-robot-state.sqlite
+  tasks:
+    - { taskType: 0, taskName: GetRobotState }
+    - { taskType: 1, taskName: VerifyToolLoad }
+    - { taskType: 2, taskName: GetExecution }
+    - { taskType: 3, taskName: StopExecution }
+  autoStart: false
+  singleton: false

@@ -1,0 +1,61 @@
+abilityName: R1ProNavigation.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+tasks:
+  - taskType: 0
+    taskName: PlanRoute
+    abilityRole: navigation
+    actionType: navigation.plan_route
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:PlanRouteInput
+    inputFields:
+      - { name: target, type: ResolvedNavigationTarget, required: true, description: Robot Agent 已解析的目标引用和位姿，路线仍按当前后端状态规划 }
+      - { name: navigation_purpose, type: enum, required: true, description: 接近抓取、携物放置或普通通行 }
+      - { name: maximum_speed_mps, type: number, required: true, description: 路径允许的最大速度，单位 m/s }
+      - { name: minimum_clearance_m, type: number, required: true, description: 路径与障碍物的最小净空，单位 m }
+      - { name: carrying_object, type: object, required: false, description: 携物导航时已验证的持物状态 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: FollowRoute
+    abilityRole: navigation
+    actionType: navigation.follow_route
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:FollowRouteInput
+    inputFields:
+      - { name: route_ref, type: string, required: false, description: PlanRoute 返回的路线引用 }
+      - { name: navigation_purpose, type: enum, required: false, description: 本次路线执行用途 }
+      - { name: maximum_speed_mps, type: number, required: false, description: 执行速度上限，单位 m/s }
+      - { name: minimum_clearance_m, type: number, required: false, description: 执行时的最小净空，单位 m }
+      - { name: carrying_object, type: object, required: false, description: 携物状态及约束 }
+      - { name: reason, type: string, required: false, description: 安全停止路线时的原因 }
+      - { name: mode, type: enum, required: false, description: safe 或 immediate；与 reason 一起用于停止变体 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: VerifyArrival
+    abilityRole: navigation
+    actionType: navigation.verify_arrival
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:VerifyArrivalInput
+    inputFields:
+      - { name: target, type: ResolvedNavigationTarget, required: true, description: 需要按当前 Robot 状态独立复核的目标位姿 }
+      - { name: navigation_purpose, type: enum, required: true, description: 导航用途，用于选择验收约束 }
+      - { name: arrival_radius_m, type: number, required: true, description: 到达位姿允许的最大位置误差，单位 m }
+      - { name: require_visual_confirmation, type: boolean, required: true, description: 是否要求视觉来源参与到达验证 }
+      - { name: carrying_object, type: object, required: false, description: 到达时必须保持一致的持物状态 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 4
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

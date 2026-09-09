@@ -1,0 +1,68 @@
+abilityName: R1ProEndEffector.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+tasks:
+  - taskType: 0
+    taskName: SetOpening
+    abilityRole: end_effector
+    actionType: gripper.set_opening
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:SetOpeningInput
+    inputFields:
+      - { name: tools, type: "ToolCommandInput[]", required: true, description: 一至两个工具的目标开度与力限制 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: CloseUntilContact
+    abilityRole: end_effector
+    actionType: gripper.close
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:CloseUntilContactInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 需要抓取的语义物体引用 }
+      - { name: tools, type: "ToolCommandInput[]", required: true, description: 一至两个工具的目标位置与力限制 }
+      - { name: candidate_id, type: string, required: true, description: 当前抓取候选 ID }
+      - { name: grasp_pose, type: PoseInput, required: true, description: 已核对的抓取位姿 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: Release
+    abilityRole: end_effector
+    actionType: gripper.release
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:ReleaseInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 当前已持有物体引用 }
+      - { name: tools, type: "ToolCommandInput[]", required: true, description: 一至两个工具的释放目标位置与力限制 }
+      - { name: target_ref, type: string, required: true, description: 目标槽位或放置区域引用 }
+      - { name: target_revision, type: string, required: true, description: 释放前核对过的目标观测版本 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: HoldObject
+    abilityRole: end_effector
+    actionType: gripper.hold_object
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:HoldObjectInput
+    inputFields:
+      - { name: object_ref, type: string, required: false, description: 需要继续保持的物体引用 }
+      - { name: tools, type: "ToolCommandInput[]", required: false, description: 需要保持当前位置的一至两个工具 }
+      - { name: preserve_tool_state, type: boolean, required: false, description: 是否保持当前工具位置和承载状态 }
+      - { name: object_may_be_released, type: boolean, required: false, description: 安全停止时是否允许释放物体 }
+      - { name: reason, type: string, required: true, description: 进入 hold 的明确原因 }
+      - { name: mode, type: enum, required: false, description: safe 或 immediate 停止模式 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 4
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 5
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

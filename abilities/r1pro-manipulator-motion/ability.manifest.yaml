@@ -1,0 +1,73 @@
+abilityName: R1ProManipulatorMotion.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+tasks:
+  - taskType: 0
+    taskName: MoveEndEffector
+    abilityRole: manipulator_motion
+    actionType: motion.move_end_effector
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:MoveEndEffectorInput
+    inputFields:
+      - { name: candidate_id, type: string, required: false, description: 抓取接近变体使用的候选 ID }
+      - { name: targets, type: "EndEffectorTargetInput[]", required: true, description: 一至两个 tool_ref 及其目标位姿 }
+      - { name: coordination, type: enum, required: false, description: 双工具同步规划策略，当前固定 synchronized }
+      - { name: purpose, type: enum, required: true, description: clearance、transfer、pregrasp、insert、seat、extract、transport、place 或 retreat }
+      - { name: target_revision, type: string, required: true, description: 目标观测版本 }
+      - { name: expected_object_pose, type: PoseInput, required: false, description: place 时由本次实时槽位观测得到的目标物体位姿，仅用于确认载荷已转移到支撑面 }
+      - { name: maximum_speed_mps, type: number, required: true, description: 抓取接近速度上限，单位 m/s }
+      - { name: object_ref, type: string, required: false, description: 当前操作物体引用 }
+      - { name: target_ref, type: string, required: false, description: 放置槽位或区域引用 }
+      - { name: max_contact_force_n, type: number, required: false, description: 接近阶段允许的最大接触力，单位 N }
+      - { name: required_contact_tools, type: "string[]", required: false, description: 动作期间必须持续保持接触承载的工具；用于外拉后接合另一侧工具 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: FollowWaypoints
+    abilityRole: manipulator_motion
+    actionType: motion.follow_waypoints
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:FollowWaypointsInput
+    inputFields:
+      - { name: targets, type: "EndEffectorTargetInput[]", required: true, description: 一至两个工具的同步路径目标 }
+      - { name: coordination, type: enum, required: false, description: 当前固定 synchronized }
+      - { name: maximum_speed_mps, type: number, required: true, description: 轨迹速度上限，单位 m/s }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: LiftHeldObject
+    abilityRole: manipulator_motion
+    actionType: motion.lift_held_object
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:LiftHeldObjectInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 已夹持物体引用 }
+      - { name: tools, type: "string[]", required: true, description: 当前承载物体的一至两个工具引用 }
+      - { name: candidate_id, type: string, required: true, description: 实际采用的抓取候选 ID }
+      - { name: distance_m, type: number, required: true, description: 验证抓取所需的抬升距离，单位 m }
+      - { name: maximum_speed_mps, type: number, required: true, description: 抬升速度上限，单位 m/s }
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: MoveToPosture
+    abilityRole: manipulator_motion
+    actionType: motion.move_to_posture
+    schemaVersion: 2
+    physical: true
+    inputModel: r1pro_abilities.task_models:MoveToPostureInput
+    inputFields:
+      - { name: posture, type: string, required: true, description: Robot Profile 中声明的命名姿态 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 4
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 5
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

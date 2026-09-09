@@ -1,0 +1,17 @@
+kind: AtomAbility
+metadata:
+  name: r1pro-sensor-capture
+spec:
+  abilityName: R1ProSensorCapture.V2
+  package: semantic.r1pro.sensor-capture
+  version: 0.4.0
+  position: localhost
+  config:
+    robotDeploymentPath: configs/robot-deployment.fake.yaml
+    executionStorePath: var/r1pro-sensor-capture.sqlite
+  tasks:
+    - { taskType: 0, taskName: CaptureRGBD }
+    - { taskType: 1, taskName: GetExecution }
+    - { taskType: 2, taskName: StopExecution }
+  autoStart: false
+  singleton: false

@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# AbilityFramework 会把实例 UUID 和连接配置作为位置参数传入。启动脚本只定位
+# 当前能力包并选择部署环境中的 Python，所有生命周期逻辑都留在公共入口中。
+ABILITY_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export ABILITY_ROOT
+exec "${SEMANTIC_ABILITY_PYTHON:-python3}" "$ABILITY_ROOT/main.py" "$@"

@@ -1,0 +1,51 @@
+abilityName: R1ProGraspPlanning.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+        modelRegistryPath: { type: string, description: 模型默认值和允许列表 }
+tasks:
+  - taskType: 0
+    taskName: GenerateCandidates
+    abilityRole: grasp_planning
+    actionType: grasp.generate_candidates
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:GenerateCandidatesInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 目标物体引用 }
+      - { name: target_pose, type: PoseInput, required: true, description: 最新目标位姿 }
+      - { name: object_extent_m, type: "number[]", required: true, description: 最新观测的周转箱三轴尺寸，单位 m }
+      - { name: target_revision, type: string, required: true, description: 位姿观测版本 }
+      - { name: preferred_strategy, type: enum, required: true, description: auto、direct_bilateral、left_extract_first 或 right_extract_first }
+      - { name: maximum_candidates, type: integer, required: false, description: 最多返回的候选数量，范围 1 至 12 }
+      - { name: engaged_tool_ref, type: string, required: false, description: 单侧外拉后仍保持真实接触的工具；省略时按初始无接触入口规划 }
+      - { name: secondary_resume_phase, type: enum, required: false, description: Skill 已完成第二侧接近走廊时传 insert，只刷新并预检最后的插入目标 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: PlanTransportPosture
+    abilityRole: grasp_planning
+    actionType: grasp.plan_transport_posture
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:PlanTransportPostureInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 已验证持有的物体引用 }
+      - { name: object_pose, type: PoseInput, required: true, description: 抬升验证得到的实时物体位姿 }
+      - { name: object_extent_m, type: "number[]", required: true, description: 实时观测的物体尺寸，单位 m }
+      - { name: target_revision, type: string, required: true, description: 本次实时观测版本 }
+      - { name: tool_refs, type: "string[]", required: true, description: 当前双侧承载工具 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

@@ -1,0 +1,6 @@
+ability-py==0.4.0
+semantic-r1pro-abilities==0.1.0.dev0
+semantic-robot-sdk-core==0.5.0.dev0
+semantic-robot-sdk-r1pro==0.5.0.dev0
+PyYAML>=6,<7
+pydantic>=2.8,<3

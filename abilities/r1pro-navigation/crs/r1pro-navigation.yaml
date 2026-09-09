@@ -1,0 +1,19 @@
+kind: AtomAbility
+metadata:
+  name: r1pro-navigation
+spec:
+  abilityName: R1ProNavigation.V2
+  package: semantic.r1pro.navigation
+  version: 0.4.0
+  position: localhost
+  config:
+    robotDeploymentPath: configs/robot-deployment.fake.yaml
+    executionStorePath: var/r1pro-navigation.sqlite
+  tasks:
+    - { taskType: 0, taskName: PlanRoute }
+    - { taskType: 1, taskName: FollowRoute }
+    - { taskType: 2, taskName: VerifyArrival }
+    - { taskType: 3, taskName: GetExecution }
+    - { taskType: 4, taskName: StopExecution }
+  autoStart: false
+  singleton: false

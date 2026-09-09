@@ -1,0 +1,101 @@
+abilityName: R1ProObjectPerception.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+        modelRegistryPath: { type: string, description: 模型默认值和允许列表 }
+tasks:
+  - taskType: 0
+    taskName: LocateObject
+    abilityRole: object_perception
+    actionType: perception.locate_object
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:LocateObjectInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 需要定位的语义物体引用 }
+      - { name: approximate_region_ref, type: string, required: false, description: 可选的粗略搜索区域 }
+      - { name: pose_hint, type: PoseInput, required: false, description: 规划层提供的非权威位姿提示，Ability 会在当前场景重新观测 }
+      - { name: extent_hint_m, type: "number[]", required: false, description: 用于关联实时候选的三轴尺寸提示 }
+      - { name: category_hint, type: string, required: false, description: 用于缩小实时候选范围的语义类别提示 }
+      - { name: minimum_confidence, type: number, required: true, description: 可接受检测结果的最低置信度，范围 0 至 1 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的感知模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: VerifyPregrasp
+    abilityRole: object_perception
+    actionType: perception.verify_pregrasp
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:VerifyPregraspInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 当前抓取目标引用 }
+      - { name: candidate_id, type: string, required: true, description: 需要核对的抓取候选 ID }
+      - { name: planned_object_pose, type: PoseInput, required: true, description: 候选生成时重新观测到的物体位姿，用于验证工具确实进入凹槽而非推动箱体 }
+      - { name: expected_targets, type: "EndEffectorTargetInput[]", required: true, description: 一至两个工具的预抓取目标位姿 }
+      - { name: maximum_position_error_m, type: number, required: true, description: 接触终止后允许的末端最大位置误差，单位 m }
+      - { name: target_revision, type: string, required: true, description: 候选生成时使用的目标版本 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的感知模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: VerifyGrasp
+    abilityRole: object_perception
+    actionType: perception.verify_grasp
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:VerifyGraspInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 需要验证是否被抓取的物体引用 }
+      - { name: tools, type: "string[]", required: true, description: 参与承载的一至两个工具引用 }
+      - { name: candidate_id, type: string, required: true, description: 实际执行的抓取候选 ID }
+      - { name: initial_object_pose, type: PoseInput, required: true, description: 抬升前的真实物体位姿 }
+      - { name: minimum_lift_height_m, type: number, required: true, description: 认定离台所需的最小抬升高度，单位 m }
+      - { name: lift_height_tolerance_m, type: number, required: false, description: 前后位姿观测的线性比较容差，单位 m，与仿真步数无关 }
+      - { name: stable_duration_ms, type: integer, required: true, description: 持物稳定性连续成立时间，单位 ms }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的感知模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: ObservePlacementTarget
+    abilityRole: object_perception
+    actionType: perception.observe_placement_target
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:ObservePlacementTargetInput
+    inputFields:
+      - { name: target_ref, type: string, required: true, description: 目标槽位或放置区域引用 }
+      - { name: object_ref, type: string, required: true, description: 待放置物体引用 }
+      - { name: pose_hint, type: PoseInput, required: false, description: 规划层提供的非权威槽位位姿提示 }
+      - { name: extent_hint_m, type: "number[]", required: false, description: 用于关联实时槽位的尺寸提示 }
+      - { name: category_hint, type: string, required: false, description: 可选的槽位类别提示 }
+      - { name: require_free, type: boolean, required: false, description: 是否要求槽位当前为空 }
+      - { name: require_reachable, type: boolean, required: false, description: 是否要求目标当前可达 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的感知模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 4
+    taskName: VerifyPlacement
+    abilityRole: object_perception
+    actionType: perception.verify_placement
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:VerifyPlacementInput
+    inputFields:
+      - { name: object_ref, type: string, required: true, description: 已释放物体引用 }
+      - { name: target_ref, type: string, required: true, description: 预期放置槽位或区域引用 }
+      - { name: target_revision, type: string, required: true, description: 释放前确认的目标观测版本 }
+      - { name: target_pose_hint, type: PoseInput, required: false, description: 本次 Ability 实时观测到的槽位位姿，用于最终复核关联 }
+      - { name: target_extent_hint_m, type: "number[]", required: false, description: 本次 Ability 实时观测到的槽位尺寸 }
+      - { name: stability_duration_ms, type: integer, required: true, description: 物体稳定性连续成立时间，单位 ms }
+      - { name: require_independent_source, type: boolean, required: false, description: 是否要求使用独立于释放动作的观测来源 }
+      - { name: model_profile, type: string, required: false, description: 部署允许列表中的感知模型 Profile }
+    returns: [{ name: execution, type: object }]
+  - taskType: 5
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 6
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

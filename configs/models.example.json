@@ -1,0 +1,72 @@
+{
+  "defaults": {
+    "object_perception": "fake-perception-default",
+    "grasp_planning": "fake-grasp-default"
+  },
+  "profiles": {
+    "fake-perception-default": {
+      "ability_role": "object_perception",
+      "provider": "fake",
+      "enabled": true,
+      "settings": {}
+    },
+    "fake-perception-alt": {
+      "ability_role": "object_perception",
+      "provider": "fake",
+      "enabled": true,
+      "settings": {"pose_offset_m": 0.01}
+    },
+    "mujoco-ground-truth": {
+      "ability_role": "object_perception",
+      "provider": "mujoco_ground_truth",
+      "enabled": true,
+      "settings": {}
+    },
+    "fake-grasp-default": {
+      "ability_role": "grasp_planning",
+      "provider": "fake",
+      "enabled": true,
+      "settings": {
+        "groove_axis_local": [0.0, 1.0, 0.0],
+        "groove_top_offset_m": 0.086,
+        "groove_depth_m": 0.026,
+        "groove_backing_clearance_m": 0.002,
+        "hook_foot_length_m": 0.028,
+        "hook_forward_reach_from_load_frame_m": 0.017,
+        "hook_upper_reach_from_load_frame_m": 0.012,
+        "hook_foot_thickness_m": 0.006,
+        "hook_engagement_travel_m": 0.008
+      }
+    },
+    "mujoco-tote-grasp": {
+      "ability_role": "grasp_planning",
+      "provider": "mujoco_ground_truth",
+      "enabled": true,
+      "settings": {
+        "groove_axis_local": [1.0, 0.0, 0.0],
+        "groove_width_m": 0.230,
+        "tool_lateral_envelope_m": 0.052,
+        "groove_height_m": 0.030,
+        "groove_top_offset_m": 0.086,
+        "groove_depth_m": 0.026,
+        "wall_thickness_m": 0.004,
+        "groove_backing_clearance_m": 0.002,
+        "hook_foot_length_m": 0.028,
+        "hook_forward_reach_from_load_frame_m": 0.017,
+        "hook_upper_reach_from_load_frame_m": 0.012,
+        "hook_foot_thickness_m": 0.006,
+        "hook_engagement_travel_m": 0.008,
+        "approach_clearance_m": 0.12,
+        "tool_access_envelope_m": 0.033,
+        "tool_path_clearance_margin_m": 0.005,
+        "tool_target_side_envelope_m": 0.011,
+        "transfer_clearance_above_top_m": 0.02,
+        "pregrasp_opening_m": 0.035,
+        "clamp_target_position_m": 0.0,
+        "maximum_extraction_distance_m": 0.18,
+        "lift_distance_m": 0.16,
+        "maximum_extraction_step_m": 0.08
+      }
+    }
+  }
+}

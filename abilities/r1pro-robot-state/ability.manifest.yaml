@@ -1,0 +1,36 @@
+abilityName: R1ProRobotState.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+tasks:
+  - taskType: 0
+    taskName: GetRobotState
+    abilityRole: robot_state
+    actionType: robot.get_state
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:RobotStateInput
+    inputFields: []
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: VerifyToolLoad
+    abilityRole: robot_state
+    actionType: robot.verify_tool_load
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:VerifyToolLoadInput
+    inputFields:
+      - { name: tool_refs, type: array, required: true, description: 需要连续验证实时接触、受力和相对速度的工具引用 }
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 3
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

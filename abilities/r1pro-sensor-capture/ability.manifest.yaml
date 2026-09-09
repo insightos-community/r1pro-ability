@@ -1,0 +1,27 @@
+abilityName: R1ProSensorCapture.V2
+kind: AtomAbility
+schema:
+  config:
+    openAPIV3Schema:
+      properties:
+        robotDeploymentPath: { type: string, description: 当前 Robot 的统一部署配置路径 }
+        executionStorePath: { type: string, description: Ability Execution SQLite 路径 }
+tasks:
+  - taskType: 0
+    taskName: CaptureRGBD
+    abilityRole: sensor_capture
+    actionType: sensor.capture_rgbd
+    schemaVersion: 2
+    physical: false
+    inputModel: r1pro_abilities.task_models:CaptureRGBDInput
+    inputFields:
+      - { name: sensor_ids, type: "string[]", required: true, description: 一至两个 RGB/Depth 传感器 ID }
+    returns: [{ name: execution, type: object }]
+  - taskType: 1
+    taskName: GetExecution
+    inputModel: r1pro_abilities.task_models:GetExecutionInput
+    returns: [{ name: execution, type: object }]
+  - taskType: 2
+    taskName: StopExecution
+    inputModel: r1pro_abilities.task_models:StopExecutionInput
+    returns: [{ name: execution, type: object }]

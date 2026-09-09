@@ -1,0 +1,17 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.venv/
+dist/
+build/
+*.egg-info/
+
+# AbilityFramework、wheel、运行数据库和日志由受控环境提供，不进入源码仓库。
+/framework/*
+/requirements/*.whl
+/databases/
+/log/
+/packages/
+*.orig
+*.rej
+
