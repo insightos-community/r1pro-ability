@@ -8,7 +8,7 @@ To reconstruct another published release, read its `release.json` and select
 both `source_commit` and `build_recipe_commit`; a source tag alone may predate
 the CI scripts. This recipe reproduces the build steps, not historical archive bytes.
 
-Prerequisites: uv 0.12.12, Git and Python 3; component scripts select Python 3.13. Use a fresh virtual environment for each platform.
+Prerequisites: uv 0.12.12, Git, Make, an authenticated GitHub CLI (`gh auth login` or `GH_TOKEN`) and Python 3; component scripts select Python 3.13. Use a fresh virtual environment for each platform.
 
 The release scripts expect **two sibling checkouts**, `automation/` for build
 scripts and `source/` for the component. Run these commands from a fresh working
@@ -31,9 +31,12 @@ export GITHUB_SHA=ac6dc056448ae19f0ed6e588b7f58b443a1d1a9c
 
 The executable build entry is [`.github/scripts/build.sh`](.github/scripts/build.sh);
 archive validation is [`.github/scripts/package.py`](.github/scripts/package.py).
+The dependency download script uses `gh release download` to fetch and verify
+pinned SDK/scaffold wheels. Confirm authentication before starting the local build.
 From `source/` in the layout above:
 
 ```bash
+gh auth status
 bash ../automation/.github/scripts/build.sh
 python3 ../automation/.github/scripts/package.py 
 (cd .output/release && sha256sum -c SHA256SUMS)
