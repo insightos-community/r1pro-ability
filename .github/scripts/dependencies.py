@@ -1,6 +1,10 @@
-import hashlib,json,subprocess
+import argparse,hashlib,json,subprocess
 from pathlib import Path
 pins=[('insightos-community/Ability-SDK-Python', 'v0.4.0-insightos.2026.2', '3a90b6d94ea6babb890ffcd285ba55e5fef6fc8c'), ('insightos-community/robot-sdk', 'v0.4.0-insightos.2026.2', '59a1a8364c3d0330f1802c020e37544e0dbfa7c5'), ('insightos-community/ability-scaffold', 'v1.2.0-insightos.2026.2', 'f85b9cce4f0040671fa74ebf0a587b7e4c65a7df')]
+parser=argparse.ArgumentParser()
+parser.add_argument('--robot-sdk-only', action='store_true')
+if parser.parse_args().robot_sdk_only:
+ pins=[pin for pin in pins if pin[0]=='insightos-community/robot-sdk']
 records=[]
 for repo,tag,sha in pins:
  dest=Path('.output/deps')/repo.split('/')[-1];dest.mkdir(parents=True)

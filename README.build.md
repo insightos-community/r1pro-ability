@@ -104,3 +104,26 @@ See the [complete installer and repository index](https://github.com/insightos-c
 platform locks and end-to-end validation. Local build commands do not publish a
 Release. Publishing requires repository write access and a new version tag;
 existing release tags/assets should not be replaced.
+# Windows x64 native Ability packages
+
+Use Visual Studio 2022 x64 developer PowerShell, Git, authenticated GitHub CLI,
+and uv 0.12.12. From a clean checkout, prepare the exact native dependencies:
+
+```powershell
+git clone https://github.com/insightos-community/ability-scaffold.git sources/scaffold
+git -C sources/scaffold checkout 90917ecb0953605fa7bc47ea54e17a7e8273c1af
+git clone https://github.com/insightos-community/Ability-SDK-Python.git sources/ability-sdk
+git -C sources/ability-sdk checkout 064c36d0510b387318027213b39aaa2ffb7ea35e
+./.github/scripts/windows-build.ps1
+```
+
+The script downloads and checks the locked Robot SDK release wheels, builds the
+native `ability.exe` with static CRT, builds/installs the scaffold, Ability SDK
+and R1 Pro project wheels, runs unit tests using CPython 3.13.15, then packages
+all seven abilities. `.output/windows/` includes ZIPs, source/launcher records
+and SHA-256 checksums. ZIPs retain `arch: x86_64` and contain `bin/ability.exe`.
+
+The [Windows workflow](.github/workflows/windows.yml) runs this same script and
+uploads development artifacts. Package validation does not establish full
+AbilityFramework/Robot/MuJoCo lifecycle or physical GPU support; the explicit
+MuJoCo product tests still require a running configured scene.

@@ -1,0 +1,49 @@
+name: Native Windows Ability packages
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, feat/windows-native]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  native:
+    runs-on: windows-2022
+    timeout-minutes: 20
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: insightos-community/ability-scaffold
+          ref: 90917ecb0953605fa7bc47ea54e17a7e8273c1af
+          path: sources/scaffold
+          persist-credentials: false
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          repository: insightos-community/Ability-SDK-Python
+          ref: 064c36d0510b387318027213b39aaa2ffb7ea35e
+          path: sources/ability-sdk
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          version: 0.12.12
+      - uses: ilammy/msvc-dev-cmd@0b201ec74fa43914dc39ae48a89fd1d8cb592756
+        with:
+          arch: x64
+      - name: Build, test and package native Windows abilities
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: ./.github/scripts/windows-build.ps1
+      - uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a
+        with:
+          name: r1pro-abilities-windows-amd64
+          path: |
+            .output/windows/*
+            .output/wheels/semantic_r1pro_abilities-*.whl
+            .output/dependencies.json
+          include-hidden-files: true
+          if-no-files-found: error
