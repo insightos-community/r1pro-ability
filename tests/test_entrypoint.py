@@ -91,8 +91,10 @@ class AbilityEntrypointTest(unittest.TestCase):
                     mock.patch.object(sys, "argv", ["main.py", instance_id, "{}"]),
                 ):
                     configs.append(RuntimeConfig.load("R1ProSensorCapture.V2"))
-            self.assertEqual(configs[0].artifact_exchange_root, str(shared_root))
-            self.assertEqual(configs[1].artifact_exchange_root, str(shared_root))
+            # Windows temp paths may arrive in 8.3 form while RuntimeConfig
+            # expands them. Compare directories, still rejecting an extra UUID.
+            self.assertEqual(Path(configs[0].artifact_exchange_root).resolve(), shared_root.resolve())
+            self.assertEqual(Path(configs[1].artifact_exchange_root).resolve(), shared_root.resolve())
             self.assertNotEqual(configs[0].execution_store_path, configs[1].execution_store_path)
             self.assertIn("sensor-instance-1", configs[0].execution_store_path)
             self.assertIn("sensor-instance-2", configs[1].execution_store_path)
