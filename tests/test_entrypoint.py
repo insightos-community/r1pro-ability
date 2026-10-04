@@ -1,18 +1,3 @@
-# Copyright 2026 InsightOS
-# SPDX-License-Identifier: Apache-2.0
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#     https://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 import os
 import sys
 import tempfile
@@ -91,10 +76,8 @@ class AbilityEntrypointTest(unittest.TestCase):
                     mock.patch.object(sys, "argv", ["main.py", instance_id, "{}"]),
                 ):
                     configs.append(RuntimeConfig.load("R1ProSensorCapture.V2"))
-            # Windows temp paths may arrive in 8.3 form while RuntimeConfig
-            # expands them. Compare directories, still rejecting an extra UUID.
-            self.assertEqual(Path(configs[0].artifact_exchange_root).resolve(), shared_root.resolve())
-            self.assertEqual(Path(configs[1].artifact_exchange_root).resolve(), shared_root.resolve())
+            self.assertEqual(configs[0].artifact_exchange_root, str(shared_root))
+            self.assertEqual(configs[1].artifact_exchange_root, str(shared_root))
             self.assertNotEqual(configs[0].execution_store_path, configs[1].execution_store_path)
             self.assertIn("sensor-instance-1", configs[0].execution_store_path)
             self.assertIn("sensor-instance-2", configs[1].execution_store_path)
