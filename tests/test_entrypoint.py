@@ -76,8 +76,12 @@ class AbilityEntrypointTest(unittest.TestCase):
                     mock.patch.object(sys, "argv", ["main.py", instance_id, "{}"]),
                 ):
                     configs.append(RuntimeConfig.load("R1ProSensorCapture.V2"))
-            self.assertEqual(configs[0].artifact_exchange_root, str(shared_root))
-            self.assertEqual(configs[1].artifact_exchange_root, str(shared_root))
+            # Windows temp dirs may be reported in 8.3 short form (RUNNER~1)
+            # while RuntimeConfig expands the path via Path.resolve(); compare
+            # resolved directories so an accidentally nested Ability UUID is
+            # still rejected.
+            self.assertEqual(Path(configs[0].artifact_exchange_root).resolve(), shared_root.resolve())
+            self.assertEqual(Path(configs[1].artifact_exchange_root).resolve(), shared_root.resolve())
             self.assertNotEqual(configs[0].execution_store_path, configs[1].execution_store_path)
             self.assertIn("sensor-instance-1", configs[0].execution_store_path)
             self.assertIn("sensor-instance-2", configs[1].execution_store_path)
