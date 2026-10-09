@@ -1,45 +1,39 @@
 # Semantic R1 Pro Abilities
 
-本仓库保留 AbilityFramework 的 Manifest、CR、Task 注册和生命周期形式。Ability
-通过进程内 `semantic_robot_sdk_r1pro` 使用 Robot，不读取 ROS Topic、设备 IP、固件差异或仿真私有接口，
-也不依赖旧 `skill_library`。
+[English](README.md) | [简体中文](README.zh-CN.md)
 
-v0.5 按共享资源、依赖、停止方式和升级周期划分为七个逻辑接口：
+This repository keeps the AbilityFramework Manifest, CR, Task registration, and lifecycle model. Abilities use the Robot through the in-process `semantic_robot_sdk_r1pro`; they do not read ROS Topics, device IPs, firmware differences, or simulation-private interfaces, and they do not depend on the legacy `skill_library`. Processes are hosted by AbilityFramework, and hardware / simulation access is provided by the Robot SDK; task-level Skills live in the separate robot-skill repository.
 
-- Navigation：路线计算、路径跟随和到达复核。
-- ManipulatorMotion：末端短运动、轨迹跟随和携物抬升。
-- EndEffector：受控闭合、释放和保持。
-- RobotState：Robot 状态与持物状态。
-- SensorCapture：RGBD 获取与 Artifact 引用。
-- ObjectPerception：目标、预抓取、抓取和放置结果的感知与复核。
-- GraspPlanning：抓取候选生成和排序。
+v0.5 is divided into seven logical interfaces by shared resources, dependencies, stop behavior, and upgrade cadence:
 
-周转箱链使用 Action schema v2：运动输入为左右末端的 `targets[]`，末端执行器
-输入为 `tools[]`。MuJoCo Provider 从 Runtime 的真实对象、工具接触和 RGB-D
-状态形成 Observation；不会使用 Fake Provider、隐藏 attach 或直接写物体 Pose。
+- Navigation: route computation, path following, and arrival verification.
+- ManipulatorMotion: short end-effector motions, trajectory following, and lifting while carrying objects.
+- EndEffector: controlled closing, releasing, and holding.
+- RobotState: Robot state and held-object state.
+- SensorCapture: RGBD capture and Artifact references.
+- ObjectPerception: perception and verification of targets, pre-grasps, grasps, and placement results.
+- GraspPlanning: generation and ranking of grasp candidates.
 
-`PolicyControl` 属于 v0.8 的模型闭环能力，不进入 v0.5 的包、CR 和运行进程。
+The tote chain uses Action schema v2: motion inputs are `targets[]` for the left and right end-effectors, and end-effector inputs are `tools[]`. The MuJoCo Provider forms Observations from the Runtime's real objects, tool contacts, and RGB-D state; it never uses a Fake Provider, hidden attach, or direct writes to object poses.
 
-每个业务输入由 Pydantic 严格模型检查，不能携带连接和部署字段。每次调用保存
-invocation、底层 command、按序 Feedback、Observation、结果与错误；`GetExecution`
-支持从指定反馈序号继续读取。`StopExecution` 会把停止传到 Robot SDK，并且只有取得
-设备停止和 hold 证据后才报告 `stopped`。
+`PolicyControl` is a v0.8 model closed-loop capability and does not enter the v0.5 packages, CRs, or running processes.
 
-每个业务 Task 还在同一份 `ability.manifest.yaml` 中声明 `inputModel`、
-`inputFields` 和 `returns`。`inputFields` 只描述 Robot Skill 或调试人员需要提供的
-语义参数，`robot_id` 与 `invocation_id` 由 Pilot 补齐。设备页和右侧 Inspector
-直接展示这些字段的名称、类型、必填性和说明；新增或修改 Pydantic 输入字段时必须
-同步更新 Manifest，`tests/test_manifests.py` 会阻止二者发生漂移。
+Every business input is validated by a strict Pydantic model and cannot carry connection or deployment fields. Each invocation stores the invocation, the underlying commands, ordered Feedback, Observations, the result, and errors; `GetExecution` supports resuming reads from a given feedback sequence number. `StopExecution` propagates the stop to the Robot SDK and only reports `stopped` after obtaining evidence of device stop and hold.
 
-AbilityFramework 二进制和 `ability_py` wheel 由部署环境提供，运行数据库和日志不提交。
-同一台 Robot 的 Backend Endpoint、固件 Profile、Provider 和安全参数只保存在一份
-`RobotDeployment` YAML 中。各 CR 的 `spec.config` 只引用同一个
-`robotDeploymentPath`，并保存本 Ability 自己的 `executionStorePath` 和可选
-`modelRegistryPath`；部署新 Robot 时不再逐个复制底层连接参数。
+Each business Task also declares `inputModel`, `inputFields`, and `returns` in the same `ability.manifest.yaml`. `inputFields` only describes the semantic parameters a Robot Skill or a debugger needs to provide; `robot_id` and `invocation_id` are filled in by Pilot. The device page and the right-hand Inspector directly display these fields' names, types, requiredness, and descriptions; when Pydantic input fields are added or modified, the Manifest must be updated in sync, and `tests/test_manifests.py` prevents the two from drifting apart.
 
-## 构建、打包和部署
+The AbilityFramework binary and the `ability_py` wheel are provided by the deployment environment; runtime databases and logs are not committed. The Backend Endpoint, firmware Profile, Provider, and safety parameters of a given Robot live in a single `RobotDeployment` YAML. Each CR's `spec.config` only references the same `robotDeploymentPath` and stores the Ability's own `executionStorePath` plus an optional `modelRegistryPath`; deploying a new Robot no longer means copying low-level connection parameters one by one.
 
-七类 Ability 是七个独立 AbilityFramework 包，共享一份业务 Wheel：
+## Project Structure
+
+- `r1pro_abilities/`: shared Python implementation.
+- `abilities/`: entry points and manifests of the seven Abilities.
+- `configs/`: example Robot configurations.
+- `tests/`: behavior and contract tests.
+
+## Build, Packaging, and Deployment
+
+The seven Abilities are seven independent AbilityFramework packages sharing one business Wheel:
 
 ```text
 dist/semantic_r1pro_abilities-*.whl
@@ -53,7 +47,7 @@ abilities/
 └── r1pro-grasp-planning/
 ```
 
-AbilityFramework 的 Python 环境通过 Wheel 安装公共实现和 Robot SDK，不从源码目录加载：
+The AbilityFramework Python environment installs the shared implementation and the Robot SDK from Wheels, never from source directories:
 
 ```bash
 make build
@@ -63,29 +57,51 @@ python -m pip install \
   /path/to/semantic_robot_sdk_r1pro-*.whl
 ```
 
-每个 `abilities/<name>` 目录使用提供的 `ability-scaffold pack` 在 staging 目录打包。
-源码目录不保存 Framework 运行数据库、实例日志或打包工具生成的文件。
+Each `abilities/<name>` directory is packed in a staging directory with the provided `ability-scaffold pack`. Source directories do not store Framework runtime databases, instance logs, or files generated by the packaging tool.
 
-机器人类型包共享上述 Wheel 和七个 Ability Zip，但每台 Robot 启动独立
-AbilityFramework。实例启动器为该 Robot 生成一份 `RobotDeployment`、七份 CR
-运行配置和独立 Execution 数据目录，再通过可配置的 AbilityFramework Endpoint 上传、
-启动和查询实例。旧 `ability_tool` 只适合默认 8080 的单实例开发环境，不用于同机多
-Robot 编排。
+Robot type packages share the Wheel above and the seven Ability zips, but each Robot starts its own AbilityFramework. The instance launcher generates one `RobotDeployment`, seven CR runtime configurations, and an independent Execution data directory for that Robot, then uploads, starts, and queries instances through the configurable AbilityFramework Endpoint. The legacy `ability_tool` only fits a single-instance development environment on the default port 8080 and is not used for multi-Robot orchestration on one machine.
 
-Ability 进程读取 `SEMANTIC_ROBOT_CONFIG`，并正常 Import 已安装的
-`semantic_robot_sdk_r1pro`。同型号 Robot 可以共享相同制品；不同 Robot 的
-`robot.id`、AbilityFramework Endpoint、Execution Store 和 Robot SDK 连接配置不能
-共用。
+Ability processes read `SEMANTIC_ROBOT_CONFIG` and import the installed `semantic_robot_sdk_r1pro` normally. Robots of the same model can share the same artifacts; different Robots must not share `robot.id`, AbilityFramework Endpoints, Execution Stores, or Robot SDK connection configs.
 
-SensorCapture 还读取由实例启动器设置的 `SEMANTIC_ABILITY_ARTIFACT_ROOT`。真实
-RGB/Depth 帧先原子写入该目录，Task JSON 只返回相对 `exchange_path`；Pilot 校验并
-上传后才生成 Server ArtifactRef。未配置交换目录时 CaptureRGBD 明确失败，不返回伪
-`artifact://`。
+SensorCapture also reads `SEMANTIC_ABILITY_ARTIFACT_ROOT`, set by the instance launcher. Real RGB/Depth frames are first written to that directory atomically, and the Task JSON only returns a relative `exchange_path`; the Server ArtifactRef is created only after Pilot validates and uploads the file. When no exchange directory is configured, CaptureRGBD fails explicitly instead of returning a fake `artifact://`.
 
-该交换根目录已由启动器按 Robot 隔离；Ability 不再隐式追加自身实例 UUID。
-`exchange_path` 始终可由 Pilot 直接相对于同一个根目录解引用，采图文件仍按
-invocation 摘要隔离。Ability Execution 数据库的实例隔离保持不变。
+The exchange root is already isolated per Robot by the launcher; the Ability no longer implicitly appends its own instance UUID. `exchange_path` can always be dereferenced by Pilot directly against the same root, and captured image files remain isolated by invocation digest. Instance isolation of the Ability Execution database is unchanged.
 
-自动测试仍使用 Fake Backend 验证执行、停止和 schema，但正式 MuJoCo 类型包使用
-`mujoco_ground_truth` 和 `mujoco-tote-grasp` Provider。Isaac Backend 在 v0.5
-中明确返回未实现。
+Automated tests still use the Fake Backend to verify execution, stopping, and schemas, but the official MuJoCo type package uses the `mujoco_ground_truth` and `mujoco-tote-grasp` Providers. The Isaac Backend explicitly returns unimplemented in v0.5.
+
+## Source Development Environment
+
+Python **3.11+** is required; the current quick-start Robot Bundle uses **3.13**. Build ability-py-sdk and robot-sdk first, then, following the quick-start layout:
+
+```bash
+uv venv --python 3.13
+uv pip install ../../ability-framework/ability-py-sdk/dist/*.whl \
+  ../../semantic-robotsdk/robot-sdk/dist/*.whl
+uv pip install -e .
+make build ROBOT_SDK_PATH=../../semantic-robotsdk/robot-sdk
+```
+
+All components should use the versions locked by the same manifest, and only the corresponding Wheels should remain in the input `dist/`. `make build` runs the tests and produces `dist/semantic_r1pro_abilities-*.whl`.
+
+## Using the Artifacts
+
+The shared Wheel is not a complete Ability deployment package. Framework's `scripts/refresh_v050_mujoco.py` packs the seven Ability projects, collects the SDK Wheels, and assembles the Robot Bundle through semantic-deployment.
+
+Set `SEMANTIC_ROBOT_CONFIG` for each Robot instance. Prefer Fake / simulation configs for development; a physical robot requires the corresponding drivers, calibration, and safety checks.
+
+## FAQ
+
+- Import failures usually mean a missing local SDK Wheel or the wrong Python environment.
+- The Makefile's default SDK path differs from the quick-start nested layout; pass the `ROBOT_SDK_PATH` from the example explicitly.
+- A successful Wheel build does not mean the Ability has started, nor that the Skill has been published.
+- Manifest, SDK contract, and Bundle version changes require joint verification.
+
+[Detailed technical reference](README.reference.md) · [Ability projects](abilities/) · [Robot configs](configs/)
+
+## License
+
+Copyright 2026 InsightOS. First-party code is licensed under [Apache-2.0](LICENSE); for third-party components and assets see [NOTICE](NOTICE) and the [license scope](LICENSE_SCOPE.md).
+
+## Build Reproduction on Three Platforms
+
+See the [glibc, musl, and macOS build notes](README.build.md): pinned source versions, actual script entry points, tool requirements, local and CI instructions, artifact locations, and platform verification scope.
