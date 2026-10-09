@@ -1,3 +1,18 @@
+# Copyright 2026 InsightOS
+# SPDX-License-Identifier: Apache-2.0
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     https://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import argparse,hashlib,json,subprocess
 from pathlib import Path
 pins=[('insightos-community/Ability-SDK-Python', 'v0.4.0-insightos.2026.2', '3a90b6d94ea6babb890ffcd285ba55e5fef6fc8c'), ('insightos-community/robot-sdk', 'v0.4.0-insightos.2026.2', '59a1a8364c3d0330f1802c020e37544e0dbfa7c5'), ('insightos-community/ability-scaffold', 'v1.2.0-insightos.2026.2', 'f85b9cce4f0040671fa74ebf0a587b7e4c65a7df')]
